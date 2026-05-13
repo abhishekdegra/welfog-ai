@@ -1,0 +1,60 @@
+SYSTEM MESSAGES (Single source of truth)
+======================================
+How to use:
+- Each line is: key = message
+- Messages can contain simple HTML (<br>, <b>...</b>)
+- Keep messages short and polite.
+
+greeting = Hello! How can I help you with Welfog today?
+cancelled = Okay, cancelled. How else can I help you?
+
+ask_order_id_generic = Please provide a valid Order ID (e.g., SD234J34J3G), or type 'cancel' to ask something else.
+ask_order_id_for_intent = Pehle aap apna <b>Order ID</b> bhej dein taaki main <b>{intent}</b> status check kar sakun.<br><br>Agar aapko pata nahin ki Order ID kahan milegi, to likhein: <b>order track kaise karein</b> ya <b>order id kahan milegi</b> — main step-by-step bata dunga.
+
+ask_category_select = Please reply with a category id (e.g., <b>16</b>) or category name (e.g., <b>Electronics</b>).
+categories_unavailable = Sorry, categories are not available right now. Please try again.
+categories_parse_failed = Categories loaded, but I couldn't parse them. Please try again.
+
+deals_unavailable = Sorry, today's deals are not available right now. Please try again.
+cat_feed_unavailable = Sorry, category-wise products are not available right now. Please try again.
+
+product_not_found = Sorry, we currently don't have any exact matches for '<b>{query}</b>'. Please try searching for something else.
+category_products_not_found = Sorry, I couldn't find products in this category right now. Try another category id/name.
+
+server_busy = I'm receiving a lot of requests right now and taking a little longer to think!<br>However, I can quickly help you with Welfog products, tracking orders, deals, or policies. What do you need?
+out_of_domain = I am a Welfog AI assistant and can only help with our platform's queries.
+default_deals_name = Today's Deals
+default_deal_card_title = Welfog Deal
+default_product_card_title = Welfog Product
+default_category_title = Category
+na_price = N/A
+
+categories_title = <div style='margin-bottom:8px; color:#333;'><b>All Categories:</b></div>
+categories_list_wrap_start = <div style='font-size:13px; color:#333; line-height:1.6;'>
+categories_list_wrap_end = </div>
+categories_footer = <div style='margin-top:10px; color:#666; font-size:12px;'>Reply with a category id or name (e.g., <b>16</b> or <b>Mobiles</b>) and I'll show products.</div>
+
+products_title_category = <div style='margin-bottom: 10px; color: #333;'>Here are products from your selected category:</div>
+products_title_query = <div style='margin-bottom: 10px; color: #333;'>Here are the best options for '<b>{query}</b>':</div>
+no_image = No Image
+view_product = View Product
+
+deals_title = <div style='margin-bottom: 10px; color: #333;'>🔥 <b>{title}</b></div>
+view_deal = View Deal
+
+category_feed_title = <div style='margin-bottom: 10px; color: #333;'><b>Browse by Category</b></div>
+
+ask_pincode = to check Delivery availability , please share your  <b>6-digit PIN code</b>
+server_technical_issue = we are sorry , here are some technical problem in our server , so please try again after some time .
+how_can_i_help = How can I help you?
+how_can_i_help_welfog = How can I help you with Welfog today?
+
+order_id_help = <div style="color:#333;line-height:1.55;"><b>Order ID kahan milegi</b><br><br>• Welfog app / website par <b>My Orders</b> section<br>• Order confirmation <b>SMS</b> ya <b>email</b><br>• Invoice / receipt par bhi hoti hai<br><br>Jab mil jaye to yahan paste kar dein — main status check kar lunga.</div>
+
+tracking_help = <div style="color:#333;line-height:1.55;"><b>Order track kaise karein (Welfog)</b><br><br>1) Welfog <b>app</b> ya <b>website</b> par login karein.<br>2) <b>My Orders / Orders</b> kholen — yahin status / tracking dikhta hai.<br>3) Courier tracking link (agar diya ho) wahi se open karein.<br>4) Order ID confirmation <b>SMS / email</b> par bhi milti hai.<br><br><b>Optional:</b> agar aap Order ID yahan bhej denge to main live status check karke bata sakta hun.</div>
+
+order_tracking_optional_id_footer = <span style="color:#555;font-size:13px;">Agar aap chahen to apni <b>Order ID</b> yahan bhej dein — main turant track karke status bata dunga.</span>
+
+refund_payment_help = <div style="color:#333;line-height:1.55;">Refund / return / payment ke rules aur steps ke liye Welfog app ya website par <b>Help / Orders</b> section dekhen, ya policy pages follow karein.<br><br>Specific status ke liye <b>Order ID</b> share kar sakte hain.</div>
+
+off_topic_polite = Main sirf Welfog shopping aur support mein madad kar sakta hun — products, order, delivery, ya policies poochh sakte hain.

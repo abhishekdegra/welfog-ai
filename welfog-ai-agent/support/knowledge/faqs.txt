@@ -1,0 +1,32 @@
+Order Placement, Modification & Cancellation:
+To place an order on Welfog, select your product, add it to the cart, and proceed to checkout using your registered account. You generally cannot modify an order once it is placed, but you can cancel it before it is shipped and place a new one. Orders may be cancelled automatically if there is an inventory issue or a payment failure.
+
+Order Tracking & Status Meanings:
+You can track your package directly from the 'Order History' section in your account. The order statuses mean: 'Pending' (awaiting payment/confirmation), 'Accepted' (confirmed by the seller), 'Shipped' (dispatched via our courier partners), and 'Delivered' (reached your address).
+
+Invoices & Order History:
+Welfog provides a valid invoice or bill for every order. You can view your complete order history, check order details, and easily download your invoice directly from the 'Order History' section after the purchase is confirmed.
+
+Payment Methods & Security:
+Welfog accepts multiple secure payment methods including UPI, Credit/Debit Cards, Net Banking, and Wallets. Cash on Delivery (COD) is also available depending on your PIN code eligibility. Your payment information is 100% safe, processed through encrypted gateways, and Welfog does not charge any hidden fees.
+
+Payment Failures & Deductions:
+If your payment failed but the amount was deducted from your bank account, please do not panic. The transaction will automatically be reversed by your bank, and the refund will reflect in your account within 5-7 business days. If you face issues during checkout, please check your internet connection or try another payment method.
+
+Shipping & Delivery Time:
+Order processing and delivery usually take 3-5 days depending on your location and PIN code availability. Shipping charges (or free shipping eligibility) will be calculated and displayed at checkout. If your package is delayed, lost, or you are not available at the time of delivery, our courier partners will attempt delivery again or you can contact support.
+
+Returns, Replacements & Damaged Items:
+You can initiate a return or replacement request within 7 days of delivery through your 'Order History'. If you receive a wrong, damaged, or defective item, please upload clear photos while raising the request. Please note that certain perishable or hygiene products may not be eligible for return.
+
+Refund Processing Time:
+Once your return is approved and the item is successfully picked up, or if your order is cancelled prior to shipping, the refund is processed within 5-7 business days to your original payment method.
+
+Coupons & Discounts:
+You can apply a valid coupon or discount code at the checkout page before making the payment. If your coupon code isn't working, it might have expired, may not be applicable to the selected products, or the minimum cart value hasn't been met.
+
+Account Details & Customer Support:
+You can update your delivery address, phone number, and personal details directly from your Account Settings. For any issues, queries, or to report a problem, you can contact Welfog customer support through the 'Help & Support' section in the Welfog mobile app or email us at grievance@welfog.com.
+
+Product Reviews:
+You can leave a review and rating for a product after it has been delivered to you. Welfog values authentic feedback and verifies product reviews to ensure they are from genuine buyers.

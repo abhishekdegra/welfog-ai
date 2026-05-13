@@ -1,0 +1,20 @@
+Information Collection:
+Welfog collects personal information (like name, contact, payment details) and non-personal information (like device details, browsing patterns) to operate the platform, improve user experience, and ensure safety.
+
+Third-Party Links & Ads:
+The Welfog platform may contain advertisements or links to external third-party websites. Welfog does not control these external sites and is not responsible for their privacy practices, accuracy, or security.
+
+Data Collection & Usage:
+Welfog collects your personal details (name, email, shipping address) and app usage data to process your e-commerce orders, host your short videos, recommend products, and prevent fraud. We do not sell your personal data to unauthorized third parties.
+
+Photo, Video & Camera Permissions:
+The Welfog app requires access to your device's photos and videos ONLY when you actively choose to upload a short video (reel), set a profile picture, or select a video thumbnail. We do not scan or upload your background media. Your media remains secure and locally stored until you upload it.
+
+Information Sharing & Third Parties:
+We share your data only with trusted third-party partners who help us run the platform, such as logistics partners (for delivery) and payment processors (for secure payments). We may also share data to comply with legal obligations or to conduct credit assessments for financial options.
+
+Data Deletion & Privacy Rights:
+Users have the full right to access, correct, or request the deletion of their personal information. If you want to delete your data or withdraw your consent, you can directly contact our Grievance Officer at legal.grievance@welfog.com.
+
+Children's Privacy (Under 18):
+The Welfog E-commerce marketplace is strictly for individuals 18 years and older. However, for the Short Video (Shorts) feature, users under the age of 18 (Children) can access and upload content ONLY with the verifiable consent of their parent or legal guardian.

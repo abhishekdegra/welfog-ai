@@ -1,0 +1,6 @@
+Return Policy:
+Customer can return the product within 7 days.
+
+Refund Policy:
+Refund will be processed in 5-7 business days to the original payment method.
+Refund depends on order status and eligibility.

@@ -1,0 +1,11 @@
+Payment Methods & Gateway:
+Welfog supports all major payment options including UPI, Credit/Debit Cards, Net Banking, and Wallets. Payments are processed through secure third-party payment gateways. Welfog acts as a limited payment agent to facilitate transactions.
+
+Cash on Delivery (COD) Rules:
+Cash on Delivery (COD) is available on eligible products depending on the user's pin code. Welfog reserves the right to block or restrict COD payments for high-value orders, payment defaults, or suspicious accounts.
+
+Bank Account Update Rules:
+Users can update their bank account details for refunds up to 5 times in a single day. If a transaction is already pending, bank details cannot be changed. If the limit is crossed, users must contact customer support.
+
+Service Charges:
+Welfog may charge fees for specific services, such as premium returns or COD handling fees. These service charges will be displayed during checkout and are strictly non-refundable once paid.

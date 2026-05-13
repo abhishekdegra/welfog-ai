@@ -1,0 +1,26 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Settings{% endblock %}
+{% block header_title %}Settings{% endblock %}
+{% block content %}
+<div class="admin-settings-block">
+  <h2>Account</h2>
+  <dl>
+    <dt>Logged in as</dt>
+    <dd>{{ current_user.username }}</dd>
+    <dt>User ID</dt>
+    <dd>{{ current_user.id }}</dd>
+  </dl>
+</div>
+<div class="admin-settings-block">
+  <h2>Knowledge storage</h2>
+  <dl>
+    <dt>Directory</dt>
+    <dd><code>{{ knowledge_dir }}</code></dd>
+  </dl>
+  <p style="margin:12px 0 0;font-size:0.85rem;color:var(--admin-muted);">Manage files under <strong>Knowledge</strong> in the sidebar.</p>
+</div>
+<div class="admin-settings-block">
+  <h2>Session</h2>
+  <a href="{{ url_for('admin_logout') }}" class="admin-btn admin-btn--danger">Log out</a>
+</div>
+{% endblock %}
