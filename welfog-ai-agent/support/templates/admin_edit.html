@@ -1,0 +1,18 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Edit {{ filename }}{% endblock %}
+{% block header_title %}Edit: {{ filename }}{% endblock %}
+{% block content %}
+<div class="admin-panel" style="max-width:none;">
+  <p style="margin:0 0 16px;font-size:0.85rem;color:var(--admin-muted);">Saving refreshes the knowledge index for the chat agent.</p>
+  <form method="POST">
+    <div class="admin-form-group">
+      <label for="kb_body">Content</label>
+      <textarea class="admin-textarea admin-textarea--tall" id="kb_body" name="content" spellcheck="false" required>{{ content }}</textarea>
+    </div>
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn admin-btn--primary">Save changes</button>
+      <a href="{{ url_for('admin_knowledge') }}" class="admin-btn admin-btn--outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

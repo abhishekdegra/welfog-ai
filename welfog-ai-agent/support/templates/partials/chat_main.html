@@ -1,0 +1,27 @@
+{# Main area: top bar, welcome hero, messages, composer #}
+<div class="main-panel state-landing" id="mainPanel">
+    <header class="main-header">
+        <button type="button" class="icon-btn main-header__menu" onclick="toggleHistory()" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+        <div class="main-header__fill"></div>
+        <button type="button" class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Switch theme">
+            {# Light mode: moon (go dark). Dark mode: sun (go light). Only one visible. #}
+            <i class="fas fa-moon" id="themeIconDark" hidden></i>
+            <i class="fas fa-sun" id="themeIconLight"></i>
+        </button>
+    </header>
+
+    <div class="main-body">
+        <div class="welcome-hero" id="welcomeHero">
+            <h1 class="welcome-hero__title">What are you working on?</h1>
+            <p class="welcome-hero__subtitle">Ask about orders, products, delivery, or anything on Welfog.</p>
+        </div>
+        <div id="chat" class="chat chat-messages" aria-live="polite"></div>
+    </div>
+
+    <div class="composer">
+        <div class="composer__inner">
+            <input type="text" id="chatInput" class="composer__input" placeholder="Ask anything" autocomplete="off" />
+            <button type="button" class="composer__send send-btn" id="chatSendBtn" onclick="send()" title="Send" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>

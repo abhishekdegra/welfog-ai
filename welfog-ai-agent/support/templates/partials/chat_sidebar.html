@@ -1,0 +1,17 @@
+{# Sidebar: brand, new chat, history (component) #}
+<div class="history-panel" id="historyPanel">
+    <div class="sidebar-brand">
+        <span class="sidebar-brand__text">Welfog AI</span>
+    </div>
+    <button type="button" class="btn-new-chat" onclick="newChat()" title="New chat">
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        <span>New chat</span>
+    </button>
+    <div class="history-section">
+        <div class="history-header">
+            <span>Past 7 days</span>
+            <button type="button" class="icon-btn history-close-mobile" onclick="toggleHistory()" aria-label="Close history"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="history-list" id="historyList"></div>
+    </div>
+</div>

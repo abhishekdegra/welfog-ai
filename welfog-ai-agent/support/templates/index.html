@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welfog AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+</head>
+<body class="app-body">
+
+<div class="container">
+    {% include "partials/chat_sidebar.html" %}
+    {% include "partials/chat_main.html" %}
+</div>
+
+{% include "partials/chat_modal.html" %}
+
+<script>
+const chat = document.getElementById("chat");
+const mainPanel = document.getElementById("mainPanel");
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const themeToggle = document.getElementById("themeToggle");
+const themeIconDark = document.getElementById("themeIconDark");
+const themeIconLight = document.getElementById("themeIconLight");
+let currentChatId = null;
+let pendingDeleteId = null;
+/** True while waiting for /chat response — blocks double-send */
+let chatAwaitingReply = false;
+
+const THEME_KEY = "welfog_chat_theme";
+
+function isDesktopLayout() {
+    return window.matchMedia("(min-width: 768px)").matches;
+}
+
+function applyTheme(theme) {
+    const t = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", t);
+    localStorage.setItem(THEME_KEY, t);
+    if (themeIconDark && themeIconLight) {
+        if (t === "light") {
+            themeIconDark.removeAttribute("hidden");
+            themeIconLight.setAttribute("hidden", "");
+        } else {
+            themeIconDark.setAttribute("hidden", "");
+            themeIconLight.removeAttribute("hidden");
+        }
+    }
+}
+
+function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") {
+        applyTheme(saved);
+    } else {
+        applyTheme("dark");
+    }
+}
+
+function enterChatMode() {
+    if (!mainPanel) return;
+    mainPanel.classList.remove("state-landing");
+    mainPanel.classList.add("state-chat");
+}
+
+function enterLandingMode() {
+    if (!mainPanel) return;
+    mainPanel.classList.add("state-landing");
+    mainPanel.classList.remove("state-chat");
+}
+
+async function initDesktopHistory() {
+    const panel = document.getElementById("historyPanel");
+    if (!isDesktopLayout()) return;
+    panel.classList.add("open");
+    await refreshHistoryList();
+}
+
+let resizeHistoryTimer = null;
+function scheduleResizeHistorySync() {
+    clearTimeout(resizeHistoryTimer);
+    resizeHistoryTimer = setTimeout(async () => {
+        const panel = document.getElementById("historyPanel");
+        if (isDesktopLayout()) {
+            panel.classList.add("open");
+            await refreshHistoryList();
+        } else {
+            panel.classList.remove("open");
+        }
+    }, 200);
+}
+
+function addMessage(text, type){
+    const div = document.createElement("div");
+    div.className = "msg " + type;
+    div.innerHTML = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping(){
+    const div = document.createElement("div");
+    div.className = "typing";
+    div.id = "typing";
+    div.innerHTML = "Typing<span class='dot'>.</span><span class='dot'>.</span><span class='dot'>.</span>";
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping(){
+    const t = document.getElementById("typing");
+    if (t) t.remove();
+}
+
+function setChatComposerLocked(locked) {
+    const input = document.getElementById("chatInput");
+    const btn = document.getElementById("chatSendBtn");
+    const inner = document.querySelector(".composer__inner");
+    if (input) {
+        input.disabled = !!locked;
+    }
+    if (btn) {
+        btn.disabled = !!locked;
+    }
+    if (inner) {
+        inner.classList.toggle("composer__inner--locked", !!locked);
+        inner.setAttribute("aria-busy", locked ? "true" : "false");
+    }
+}
+
+function getChatIdFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("chat_id");
+    return id ? id : null;
+}
+
+function setChatIdInUrl(chatId){
+    const params = new URLSearchParams(window.location.search);
+    if (chatId) {
+        params.set("chat_id", String(chatId));
+    } else {
+        params.delete("chat_id");
+    }
+    const newUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+    window.history.replaceState({}, "", newUrl);
+}
+
+function syncHistoryActive() {
+    document.querySelectorAll(".hist-item").forEach(function(el) {
+        const cid = el.dataset.chatId;
+        const active = currentChatId != null && cid != null && String(cid) === String(currentChatId);
+        el.classList.toggle("hist-item--active", active);
+    });
+}
+
+async function initializeChatFromUrl(){
+    const initialId = getChatIdFromUrl();
+    if (initialId) {
+        await loadOldChat(initialId, true);
+    }
+}
+
+async function send(){
+    const input = document.getElementById("chatInput");
+    const message = input.value.trim();
+    if (!message) return;
+    if (chatAwaitingReply) return;
+
+    chatAwaitingReply = true;
+    setChatComposerLocked(true);
+
+    try {
+        enterChatMode();
+        await new Promise(function(resolve) {
+            requestAnimationFrame(function() { requestAnimationFrame(resolve); });
+        });
+
+        addMessage(message, "user");
+        input.value = "";
+
+        showTyping();
+
+        const res = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message, chat_id: currentChatId })
+        });
+        const data = await res.json();
+
+        if (data.chat_id) {
+            currentChatId = data.chat_id;
+            setChatIdInUrl(currentChatId);
+        }
+
+        removeTyping();
+        addMessage(data.data, "bot");
+        const historyPanel = document.getElementById("historyPanel");
+        if (historyPanel && historyPanel.classList.contains("open")) {
+            await refreshHistoryList();
+        } else {
+            syncHistoryActive();
+        }
+    } catch (e) {
+        removeTyping();
+        addMessage("Server error...", "bot");
+    } finally {
+        chatAwaitingReply = false;
+        setChatComposerLocked(false);
+    }
+}
+
+async function newChat() {
+    chatAwaitingReply = false;
+    setChatComposerLocked(false);
+    chat.innerHTML = "";
+    currentChatId = null;
+    setChatIdInUrl(null);
+    enterLandingMode();
+    await fetch("/api/chat/new", { method: "POST" });
+    const panel = document.getElementById("historyPanel");
+    if (isDesktopLayout()) {
+        panel.classList.add("open");
+        await refreshHistoryList();
+    } else {
+        panel.classList.remove("open");
+    }
+}
+
+async function refreshHistoryList() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "<div class=\"hist-placeholder\">Loading…</div>";
+    const res = await fetch("/api/chats");
+    const chats = await res.json();
+    list.innerHTML = "";
+    if (chats.length === 0) {
+        list.innerHTML = "<div class=\"hist-placeholder\">No recent chats</div>";
+        return;
+    }
+    chats.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "hist-item";
+        div.dataset.chatId = String(c.chat_id);
+        div.onclick = () => loadOldChat(c.chat_id);
+
+        const row = document.createElement("div");
+        row.className = "hist-item-row";
+
+        const body = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "hist-title";
+        title.textContent = c.title;
+        const date = document.createElement("div");
+        date.className = "hist-date";
+        date.textContent = c.date_str;
+        body.appendChild(title);
+        body.appendChild(date);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "hist-delete";
+        deleteBtn.title = "Delete this chat";
+        deleteBtn.innerHTML = "<i class='fas fa-trash'></i>";
+        deleteBtn.onclick = async function(event) {
+            event.stopPropagation();
+            await deleteChat(c.chat_id);
+        };
+
+        row.appendChild(body);
+        row.appendChild(deleteBtn);
+        div.appendChild(row);
+        list.appendChild(div);
+    });
+    syncHistoryActive();
+}
+
+async function toggleHistory() {
+    const panel = document.getElementById("historyPanel");
+    if (!panel) return;
+    panel.classList.toggle("open");
+    if (panel.classList.contains("open")) {
+        try {
+            await refreshHistoryList();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+
+async function loadOldChat(id, skipUrlUpdate = false) {
+    chatAwaitingReply = false;
+    setChatComposerLocked(false);
+    chat.innerHTML = "";
+    currentChatId = id;
+    if (!skipUrlUpdate) {
+        setChatIdInUrl(id);
+    }
+    const panel = document.getElementById("historyPanel");
+    if (!isDesktopLayout()) {
+        panel.classList.remove("open");
+    }
+
+    const res = await fetch(`/api/chat/messages/${id}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error || !Array.isArray(data) || data.length === 0) {
+        currentChatId = null;
+        setChatIdInUrl(null);
+        chat.innerHTML = "";
+        enterChatMode();
+        addMessage("No chat found. Start a new conversation.", "bot");
+        syncHistoryActive();
+        return;
+    }
+
+    enterChatMode();
+    data.forEach(m => {
+        addMessage(m.message, m.sender === "user" ? "user" : "bot");
+    });
+    chat.scrollTop = chat.scrollHeight;
+    syncHistoryActive();
+}
+
+function showDeleteModal(id) {
+    pendingDeleteId = id;
+    deleteConfirmModal.classList.add("show");
+}
+
+function hideDeleteModal() {
+    pendingDeleteId = null;
+    deleteConfirmModal.classList.remove("show");
+}
+
+async function confirmDeleteChat() {
+    if (!pendingDeleteId) return;
+    const deleteId = pendingDeleteId;
+    hideDeleteModal();
+    const res = await fetch(`/api/chat/delete/${deleteId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (!res.ok) {
+        enterChatMode();
+        addMessage(data.message || "Unable to delete chat.", "bot");
+        pendingDeleteId = null;
+        return;
+    }
+    if (currentChatId === deleteId) {
+        currentChatId = null;
+        setChatIdInUrl(null);
+        chat.innerHTML = "";
+        enterLandingMode();
+    }
+    pendingDeleteId = null;
+    await refreshHistoryList();
+}
+
+async function deleteChat(id) {
+    showDeleteModal(id);
+}
+
+document.getElementById("chatInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (chatAwaitingReply) return;
+        send();
+    }
+});
+
+if (themeToggle) {
+    themeToggle.addEventListener("click", function() {
+        const cur = document.documentElement.getAttribute("data-theme") || "dark";
+        applyTheme(cur === "dark" ? "light" : "dark");
+    });
+}
+
+window.addEventListener("resize", scheduleResizeHistorySync);
+
+window.addEventListener("DOMContentLoaded", async () => {
+    initTheme();
+    await initDesktopHistory();
+    await initializeChatFromUrl();
+});
+</script>
+</body>
+</html>

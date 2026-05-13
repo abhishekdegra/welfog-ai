@@ -1,0 +1,183 @@
+WELFOG API PLAYBOOK (Advanced Instructions)
+==========================================
+Goal: User ki query ko sahi API + sahi params me map karna.
+Rule: Hamesha pehle intent decide karo: (product search) vs (category browse) vs (deals) vs (category-wise feed).
+
+------------------------------------------------------------
+1) PRODUCT SEARCH API (Main)
+------------------------------------------------------------
+Endpoint:
+  https://welfogapi.welfog.com/api/v2/products/search
+
+Supported params (observed):
+  - page: integer (1,2,3...)  [NEVER send null; default = 1]
+  - name: text query (free text)  [product name / brand / model / keyword]
+  - categories: category_id number (from nav_cat_data)
+  - color: color text (e.g., "Black", "White", "Multicolor")
+  - latitude, longitude: optional (blank ok in current backend usage)
+
+How to decide params:
+  A) If user asks for a specific item or keyword ("charger", "red tshirt", "samsung phone"):
+     - Use name=<clean query>
+     - If color mentioned, add color=<ColorName>
+     - If category is known (explicit category or user selected category), add categories=<id>
+
+  B) If user asks "all products of a category" ("mobiles category ke saare", "electronics me dikhao"):
+     - Use categories=<id>
+     - Keep name empty OR omit name
+     - Use page=1, then paginate if user asks "more"
+
+  C) If user asks "X under color" ("black shoes", "multicolor saree"):
+     - Use name=<main item> AND color=<ColorName>
+     - If name becomes empty after cleaning, do categories=<id> + color=<ColorName> (if category is known)
+
+  D) If user asks for brand/model ("iphone cover", "samsung m14"):
+     - Prefer name="<brand> <model> <item>"
+     - If results wrong category (e.g., phone search returns covers), apply strict filtering on client side:
+       - If user did NOT ask for cover/case/protector, exclude those words.
+       - If user did NOT ask for charger/cable/adapter, exclude those words.
+
+Query cleaning rules:
+  - Remove filler: "show me", "need", "want", "buy", "please", "bhai", "mujhe", "dikha"
+  - Keep product nouns + brand + model + key attributes (color, size)
+  - If query too broad ("show products"), ask user to pick category OR show categories using nav_cat_data.
+
+Examples:
+  - "phone" =>
+    /api/v2/products/search?page=1&name=phone
+  - "multicolor shoes" =>
+    /api/v2/products/search?page=1&name=shoes&color=Multicolor
+  - "category 16 multicolor" =>
+    /api/v2/products/search?page=1&categories=16&color=Multicolor
+
+------------------------------------------------------------
+2) ALL CATEGORIES (Browse / Category Selection)
+------------------------------------------------------------
+Endpoint:
+  https://welfogapi.welfog.com/api/nav_cat_data
+
+Use this when:
+  - user says: "all categories", "categories list", "konsi category hai"
+  - user query is too broad: "show products", "shopping options", "what you sell"
+  - user wants category selection before filtering by color/price/etc.
+
+Flow:
+  - Call nav_cat_data
+  - Show top categories (name + id)
+  - Ask user to choose one category (or infer from message if obvious)
+  - Then use products/search with categories=<id>
+
+------------------------------------------------------------
+3) TODAY DEALS (Deals / Offers)
+------------------------------------------------------------
+Endpoint:
+  https://welfogapi.welfog.com/api/today_deal?latitude=<lat>&longitude=<lng>
+
+Use this when:
+  - user says: "today deals", "aaj ke offers", "discount items", "best deals"
+
+Rules:
+  - latitude/longitude required by API format; if user's location not available, send default lat/lng.
+  - If user wants deals within a specific category, first fetch today deals then filter by category client-side (if response includes category fields), OR ask user to pick a category then show deals relevant.
+
+Default lat/lng (current):
+  latitude=34.04505157470703
+  longitude=78.38422393798828
+
+Response shape (actual):
+{
+  "title": "Deals Of The Day",
+  "count_products": 4,
+  "total": 4,
+  "page": 1,
+  "limit": 20,
+  "products": [
+    {
+      "id": "2610311",
+      "name": "Best Iphone Mobile case and cover",
+      "brand": "No Brand",
+      "slug": "best-iphone-mobile-case-and-cover-2610311",
+      "thumbnail_img": "1116/1116-130426-272345.webp",
+      "new_price": 109,
+      "old_price": 500,
+      "distance": "831.3 km",
+      "duration": 15068
+      // ... extra fields may exist
+    }
+  ]
+}
+
+Deals product field mapping (UI):
+  - title: response.title
+  - products list: response.products
+  - product name: p.name
+  - product image: p.thumbnail_img  (NOTE: key is thumbnail_img, not thumbnail_image)
+  - price to show: p.new_price (and strike-through p.old_price if present)
+  - product link: https://welfog.com/product/<p.slug>
+
+------------------------------------------------------------
+4) CATEGORY-WISE PRODUCT FEED (Home feed style)
+------------------------------------------------------------
+Endpoint:
+  https://welfogapi.welfog.com/api/cat_wise_product_show?latitude=<lat>&longitude=<lng>&page=<page>
+
+Use this when:
+  - user says: "category wise products", "home page products", "browse products", "trending/new by category"
+  - user does not specify a single product query but wants exploration
+
+Rules:
+  - page is required (start with 1)
+  - Show limited items per category to avoid spam; ask "more?" for pagination.
+
+Response shape (actual):
+{
+  "data": [
+    {
+      "category": {
+        "id": 16,
+        "name": "Electronics",
+        "link": "/search?category=16",
+        "banner_data": [
+          { "banner_img": "...png", "banner_url": "https://welfog.com" }
+        ]
+      },
+      "products": [
+        {
+          "id": "2610311",
+          "brand": "No Brand",
+          "name": "Best Iphone Mobile case and cover",
+          "price": 109,
+          "image": "1116/1116-130426-272345.webp",
+          "link": "best-iphone-mobile-case-and-cover-2610311"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 2,
+    "total_pages": 1,
+    "has_next_page": false
+  }
+}
+
+Category-wise field mapping (UI):
+  - categories list: response.data[]
+  - category title: item.category.name
+  - show 3-5 products per category: item.products[]
+  - product image: product.image
+  - product price: product.price
+  - product link: https://welfog.com/product/<product.link>
+  - pagination: use meta.next_page if available, else page+1 only if has_next_page=true
+
+------------------------------------------------------------
+5) Fallback / Recovery Strategy
+------------------------------------------------------------
+If products/search returns empty:
+  - Reduce query to last meaningful noun (e.g., "iphone 14 pro max charger" -> try "charger")
+  - If still empty, ask a clarifying question:
+    - "Which category?", "Any preferred brand?", "Which color?"
+
+If user says "show more":
+  - increment page by 1 and call the same endpoint with same filters.
+

@@ -1,0 +1,22 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Create file{% endblock %}
+{% block header_title %}Create / Add knowledge file{% endblock %}
+{% block content %}
+<div class="admin-panel">
+  <form method="POST">
+    <div class="admin-form-group">
+      <label for="kb_name">File name (without .txt)</label>
+      <input class="admin-input" id="kb_name" type="text" name="name" placeholder="e.g. offers, electronics_faq" required>
+    </div>
+    <div class="admin-form-group">
+      <label for="kb_content">Initial content (optional)</label>
+      <textarea class="admin-textarea" id="kb_content" name="content" spellcheck="false" placeholder="Optional starting text…"></textarea>
+    </div>
+    <p style="font-size:0.8rem;color:var(--admin-muted);margin:0 0 8px;">Allowed: letters, numbers, underscore, hyphen. Saved as <code>.txt</code> in the knowledge folder.</p>
+    <div class="admin-form-actions">
+      <button type="submit" class="admin-btn admin-btn--primary">Create file</button>
+      <a href="{{ url_for('admin_knowledge') }}" class="admin-btn admin-btn--outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

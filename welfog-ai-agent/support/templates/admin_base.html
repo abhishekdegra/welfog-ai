@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block page_title %}Admin{% endblock %} · Welfog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <aside class="admin-sidebar" aria-label="Main navigation">
+      <div class="admin-sidebar__brand">
+        <div class="admin-sidebar__logo">Welfog Admin</div>
+        <div class="admin-sidebar__tag">Knowledge &amp; settings</div>
+      </div>
+      <nav class="admin-nav">
+        <a href="{{ url_for('admin_knowledge') }}" class="admin-nav__link{% if nav_active == 'knowledge' %} admin-nav__link--active{% endif %}">Knowledge</a>
+        <a href="{{ url_for('admin_settings') }}" class="admin-nav__link{% if nav_active == 'settings' %} admin-nav__link--active{% endif %}">Settings</a>
+      </nav>
+      <div class="admin-sidebar__foot">
+        <a href="{{ url_for('admin_logout') }}" class="admin-btn admin-btn--danger admin-btn--sm" style="width:100%;">Logout</a>
+      </div>
+    </aside>
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <h1 class="admin-topbar__title">{% block header_title %}Admin{% endblock %}</h1>
+        <span class="admin-topbar__user">{{ current_user.username }}</span>
+      </header>
+      <div class="admin-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="admin-flash{% if category == 'error' %} admin-flash--error{% elif category == 'success' %} admin-flash--success{% else %} admin-flash--info{% endif %}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

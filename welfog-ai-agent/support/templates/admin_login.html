@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin login · Welfog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body class="admin-login-page">
+  <div class="admin-login-card">
+    <h1>Welfog Admin</h1>
+    <p class="sub">Sign in to manage knowledge and settings.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="admin-flash{% if category == 'error' %} admin-flash--error{% elif category == 'success' %} admin-flash--success{% else %} admin-flash--info{% endif %}" style="margin-bottom:16px;">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST">
+      <div class="admin-form-group">
+        <label for="username">Username</label>
+        <input class="admin-input" id="username" type="text" name="username" placeholder="Username" autocomplete="username" required>
+      </div>
+      <div class="admin-form-group">
+        <label for="password">Password</label>
+        <input class="admin-input" id="password" type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="admin-btn admin-btn--primary" style="width:100%;">Login</button>
+    </form>
+  </div>
+</body>
+</html>

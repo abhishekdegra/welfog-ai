@@ -1,0 +1,11 @@
+Platform Role & Applicability:
+Welfog is an intermediary and technology facilitator connecting Buyers and Suppliers. Welfog provides the e-commerce marketplace and Short Video features but is NOT the seller of the products. The contract of sale is strictly between the Buyer and Supplier.
+
+User Eligibility & Age Rules:
+To buy or sell on Welfog, users must be at least 18 years old. Users under the age of 18 (Children) can access the Short Video (Shorts) services only with the verifiable consent of their parent or legal guardian.
+
+Account Security & Suspension:
+Users are fully responsible for maintaining the confidentiality of their passwords and account details. Welfog reserves the right to suspend or terminate accounts without notice in cases of fraud, abuse, fake information, or violation of platform policies.
+
+Short Video Content Rules:
+Users can create and share short videos on Welfog. Content must NOT contain hate speech, sexually explicit material, violence, fake news, or infringe on anyone's copyright. Welfog reserves the right to remove inappropriate content.
