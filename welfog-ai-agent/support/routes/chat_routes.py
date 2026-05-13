@@ -33,7 +33,9 @@ from services.welfog_api import (
     fetch_api,
     fetch_category_wise_feed,
     fetch_nav_categories,
+    fetch_order_tracking,
     fetch_products_from_api,
+    format_order_tracking_reply,
     fetch_today_deals,
     get_category_id_from_text,
 )
@@ -468,7 +470,7 @@ def chat():
                     kb_keys += ["refund", "faqs"]
                 elif _text_is_order_tracking_intent(comb):
                     local_intent = "order"
-                    kb_keys += ["shipping", "faqs"]
+                    kb_keys += ["shipping", "faqs", "welfog_api"]
                 elif any(w in txt for w in ["payment", "transaction", "upi"]):
                     local_intent = "payment"
                     kb_keys += ["payment", "faqs"]
@@ -502,7 +504,7 @@ def chat():
 
                     kb_keys = route_data.get("kb_keys") or []
                     # Always include API playbook for shopping/deals/category flows
-                    if route_data.get("intent") in ["product", "deals", "categories", "category_feed"] and "welfog_api" not in kb_keys:
+                    if route_data.get("intent") in ["product", "deals", "categories", "category_feed", "order"] and "welfog_api" not in kb_keys:
                         kb_keys = list(kb_keys) + ["welfog_api"]
                     # For non-shopping informational intents, don't ground on internal playbook files.
                     if route_data.get("intent") in ["general", "seller", "refund", "payment"] and kb_keys:
@@ -807,8 +809,12 @@ def chat():
                 response_text = sysmsg("ask_order_id_for_intent", intent=intent)
             else:
                 if intent == "order":
-                    res = fetch_api("order", current_order_id)
-                    response_text = f"Order {current_order_id} is {res['status']} and will arrive in {res['delivery']}." if res else "Order not found."
+                    res = fetch_order_tracking(current_order_id)
+                    response_text = (
+                        format_order_tracking_reply(current_order_id, res)
+                        if res
+                        else "We could not find this order. Please check the Order ID from your confirmation email, SMS, or My Orders and try again."
+                    )
                 elif intent == "refund":
                     res = fetch_api("refund", current_order_id)
                     response_text = f"Refund status: {res['status']}. Expected in {res['time']}." if res else "No refund record found."

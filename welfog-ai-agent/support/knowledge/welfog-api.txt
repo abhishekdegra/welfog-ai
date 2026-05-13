@@ -181,3 +181,42 @@ If products/search returns empty:
 If user says "show more":
   - increment page by 1 and call the same endpoint with same filters.
 
+------------------------------------------------------------
+6) ORDER TRACKING (Live status by Order ID)
+------------------------------------------------------------
+Endpoint:
+  POST https://welfogapi.welfog.com/api/onedelivery/welfog_track
+Content-Type: application/json
+
+Request body (required):
+  { "orderId": "2605081" }
+  - orderId: string of digits (same value as on confirmation / My Orders).
+
+When to use:
+  - User asks order status, tracking, "mera order kahan hai", "kab aayega", or gives only an order number after you asked for Order ID.
+
+Rules:
+  - Always send orderId as a JSON string, never null.
+  - If user message contains a valid order id + tracking intent, the support app calls this API automatically; your job is to explain fields briefly if asked.
+
+Response (success): top-level result is "ok". Useful fields:
+  - current_order_status: human label (e.g. "Order Placed", "Shipped")
+  - status: internal status string (e.g. "hold")
+  - status_type: e.g. "UD"
+  - order_id: number
+  - order_date: "YYYY-MM-DD"
+  - expected_delivery: minutes from midnight on order_date; add as timedelta to order_date for ETA (do not show raw number to customer)
+  - product_title, product_img (relative path; images use CDN base https://d1f02fefkbso7w.cloudfront.net/)
+  - payment_status, payment_type (e.g. cash_on_delivery)
+  - tracking_code: courier code when assigned (may be null)
+  - order_status_detail.order_status.order_flow: steps placed → pending → confirmed → processing → shipped → out_for_delivery → delivered (each has title, status bool, date, reason)
+
+How to describe to customer:
+  - Lead with current_order_status and product_title.
+  - Mention payment_status if unpaid/paid is relevant.
+  - If tracking_code is null, say courier tracking is not assigned yet; they can still see step-wise status from the flow.
+  - Do not invent dates; use dates from the API only.
+
+If result is not "ok" or request fails:
+  - Say the Order ID could not be found or is invalid, and ask them to copy it from email/SMS/My Orders.
+

@@ -1,8 +1,10 @@
 import difflib
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
+
+from utils.helpers import _is_plausible_order_id
 
 def fetch_api(endpoint, order_id):
     try:
@@ -10,6 +12,98 @@ def fetch_api(endpoint, order_id):
         return res.json() if res.status_code == 200 else None
     except:
         return None
+
+
+TRACKING_URL = "https://welfogapi.welfog.com/api/onedelivery/welfog_track"
+IMAGE_BASE = "https://d1f02fefkbso7w.cloudfront.net/"
+
+
+def fetch_order_tracking(order_id):
+    """
+    Live order status from OneDelivery tracking API.
+    POST JSON body: {"orderId": "<digits>"} — orderId must be a string in JSON.
+    """
+    if not order_id:
+        return None
+    oid = str(order_id).strip()
+    if not _is_plausible_order_id(oid):
+        return None
+    try:
+        res = requests.post(TRACKING_URL, json={"orderId": oid}, timeout=15)
+        if res.status_code != 200:
+            return None
+        data = res.json()
+        if not isinstance(data, dict) or data.get("result") != "ok":
+            return None
+        return data
+    except Exception as e:
+        print(f"Order tracking API error: {e}")
+        return None
+
+
+def _eta_from_order_date_and_minutes(order_date_val, minutes_val):
+    """
+    expected_delivery from API = minutes from start of order_date (date-only, local midnight).
+    Returns (formatted_datetime_str, days_equivalent_float) or (None, None).
+    """
+    if not order_date_val or minutes_val is None or minutes_val == "":
+        return None, None
+    try:
+        minutes = int(float(minutes_val))
+    except (TypeError, ValueError):
+        return None, None
+    if minutes < 0:
+        return None, None
+    raw = str(order_date_val).strip()
+    m = re.match(r"^(\d{4}-\d{2}-\d{2})", raw)
+    if not m:
+        return None, None
+    try:
+        day = datetime.strptime(m.group(1), "%Y-%m-%d")
+    except ValueError:
+        return None, None
+    eta = day + timedelta(minutes=minutes)
+    days_equiv = round(minutes / 1440.0, 1)
+    # e.g. "15 May 2026, 00:56" — day-first, English month (no locale dependency)
+    label = f"{eta.day} {eta.strftime('%B %Y')}, {eta.strftime('%H:%M')}"
+    return label, days_equiv
+
+
+def format_order_tracking_reply(order_id, data):
+    """Build HTML user message from welfog_track API payload (result ok)."""
+    title = (data.get("product_title") or "").strip() or "Order"
+    status_human = (data.get("current_order_status") or "—").strip()
+    order_date = data.get("order_date")
+    pay = data.get("payment_status")
+    ptype = data.get("payment_type")
+    ed = data.get("expected_delivery")
+    tc = data.get("tracking_code")
+    img = (data.get("product_img") or "").strip()
+
+    lines = [f"<b>Order ID:</b> {order_id}"]
+    if img:
+        src = IMAGE_BASE + img.lstrip("/")
+        lines.append(
+            "<div style='width:100%;max-width:360px;height:130px;background:#f9f9f9;border-radius:8px;"
+            "overflow:hidden;margin:10px 0;display:flex;align-items:center;justify-content:center;"
+            "border:1px solid #f0f0f0;'>"
+            f"<img src='{src}' alt='' style='max-width:100%;max-height:100%;object-fit:contain;'/>"
+            "</div>"
+        )
+    lines.append(f"<b>{title}</b>")
+    lines.append(f"<b>Current status:</b> {status_human}")
+    if order_date:
+        lines.append(f"<b>Order date:</b> {order_date}")
+    eta_label, days_equiv = _eta_from_order_date_and_minutes(order_date, ed)
+    if eta_label is not None:
+        extra = f" (~{days_equiv} days from order date)" if days_equiv is not None else ""
+        lines.append(f"<b>Expected delivery:</b> {eta_label}{extra}")
+    if pay:
+        ptype_disp = ptype.replace("_", " ") if isinstance(ptype, str) else ptype
+        lines.append(f"<b>Payment:</b> {pay}" + (f" ({ptype_disp})" if ptype_disp else ""))
+    if tc:
+        lines.append(f"<b>Tracking code:</b> {tc}")
+    return "<br>".join(lines)
 
 
 def _normalize_color(text: str):

@@ -76,14 +76,17 @@ def _looks_like_greeting_message(msg: str) -> bool:
 
 def _is_plausible_order_id(token: str) -> bool:
     """
-    Strict order-id shape:
-    - 6..24 chars alphanumeric
-    - must contain at least one letter and one digit
-    This prevents greetings like 'heyyyyy' from being treated as order IDs.
+    Order-id shapes we accept:
+    - Numeric Welfog ids (API orderId), typically 7+ digits — use 7..12 only to avoid
+      clashing with 6-digit Indian PINs in free text.
+    - Alphanumeric refs 6..24 chars with at least one letter and one digit.
+    Rejects greetings like 'heyyyyy' (letters only, or too short).
     """
     if not token:
         return False
     t = token.strip()
+    if re.fullmatch(r"\d{7,12}", t):
+        return True
     if not re.fullmatch(r"[A-Za-z0-9]{6,24}", t):
         return False
     if not re.search(r"[A-Za-z]", t):
